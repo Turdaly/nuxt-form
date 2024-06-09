@@ -1,5 +1,6 @@
 export const styles = {
   blueDark: '#A0B3D8',
+  blueDarkText: 't-text-[#A0B3D8]',
 };
 
 export const masks = {
@@ -18,3 +19,9 @@ export const rules = {
   phone: (v: any) => regex.phone.test(v) || 'Заполните поле',
   cyrillic: (v: any) => regex.cyr.test(v) || 'Неправильный формат',
 };
+
+export const getFormData = (object: any) =>
+  Object.keys(object).reduce((formData, key) => {
+    formData.append(key, object[key]);
+    return formData;
+  }, new FormData());
