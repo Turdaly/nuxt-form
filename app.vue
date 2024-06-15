@@ -4,25 +4,14 @@
       <v-fade-transition leave-absolute>
         <div v-if="loading === false" class="t-w-full t-flex t-flex-col t-bg-[#F3F6FC] t-rounded-lg t-p-6 t-mb-32 t-gap-4">
           <v-text-field
-            v-model.trim="id"
-            v-maska="masks.numbers"
-            :rules="[rules.required]"
-            clearable
-            label="Введите ID"
-            variant="outlined"
-            bg-color="white"
-            :base-color="styles.blueDark"
-            :color="styles.blueDark"
-          />
-          <v-text-field
             v-model.trim="fullName"
             :rules="[rules.required, rules.cyrillic]"
             clearable
             label="ФИО"
             variant="outlined"
             bg-color="white"
-            :base-color="styles.blueDark"
-            :color="styles.blueDark"
+            :base-color="styles.primary"
+            :color="styles.primary"
           />
           <v-text-field
             v-model.trim="phone"
@@ -32,15 +21,15 @@
             label="Номер телефона"
             variant="outlined"
             bg-color="white"
-            :base-color="styles.blueDark"
-            :color="styles.blueDark"
+            :base-color="styles.primary"
+            :color="styles.primary"
           />
-          <v-select v-model="clientType" :items="items" label="Тип клиента" variant="outlined" bg-color="white" :base-color="styles.blueDark" :color="styles.blueDark" />
-          <v-btn type="submit" text="Отправить" :elevation="0" :color="styles.blueDark" size="x-large" />
+          <v-textarea v-model="comment" clearable label="Комментарий" variant="outlined" bg-color="white" :base-color="styles.primary" :color="styles.primary" />
+          <v-btn type="submit" text="Отправить" :elevation="0" :color="styles.primary" size="x-large" />
         </div>
       </v-fade-transition>
       <v-fade-transition leave-absolute>
-        <v-progress-circular v-if="loading === true" indeterminate :size="70" :width="7" :color="styles.blueDark" />
+        <v-progress-circular v-if="loading === true" indeterminate :size="70" :width="7" :color="styles.primary" />
       </v-fade-transition>
       <v-fade-transition leave-absolute>
         <div v-if="loading === null" class="t-w-full t-flex t-flex-col t-items-center t-justify-center t-mb-32 t-gap-4">
@@ -53,7 +42,7 @@
             </svg>
             Данные сохранены успешно
           </p>
-          <span class="t-underline t-underline-offset-2" :class="[styles.blueDarkText]" @click="resetForm">Вернуться к форме</span>
+          <span class="t-underline t-underline-offset-2 t-cursor-pointer" :class="[styles.primaryText]" @click="resetForm">Вернуться к форме</span>
         </div>
       </v-fade-transition>
     </v-form>
@@ -61,13 +50,32 @@
 </template>
 
 <script setup lang="ts">
+const styles = {
+  primary: '#A0B3D8',
+  primaryText: 't-text-[#A0B3D8]',
+};
+
+const masks = {
+  phone: '+7 (7##) ### ## ##',
+};
+
+const regex = {
+  cyr: /^[\u0400-\u04FF \- a-z A-Z]+$/,
+  phone: /^\+7 \(\d{3}\) \d{3} \d{2} \d{2}/,
+};
+
+const rules = {
+  required: (v: any) => !!v || 'Заполните поле',
+  phone: (v: any) => regex.phone.test(v) || 'Заполните поле',
+  cyrillic: (v: any) => regex.cyr.test(v) || 'Неправильный формат',
+};
+
 const form = ref<any>();
-const id = ref<string>('');
 const fullName = ref<string>('');
 const phone = ref<string>('+7');
+const comment = ref<string>('');
+const clientType = ref<string>('Физ.лицо');
 const loading = ref<boolean | null>(false);
-const items = ref(['Физ.лицо', 'Юр.лицо']);
-const clientType = ref<string>(items.value[0]);
 
 const submit = async () => {
   try {
@@ -75,12 +83,13 @@ const submit = async () => {
       if (v.valid) {
         loading.value = true;
         const data = {
-          Id: `@${id.value}`,
+          Id: `@${Date.now()}`,
           Date: new Date().toLocaleString('ru'),
           Status: 'Online',
           ClientType: clientType.value,
           FullName: fullName.value,
           Phone: phone.value,
+          Comment: comment.value,
         };
         await useFetch(import.meta.env.VITE_SCRIPT_URL, {
           method: 'POST',
@@ -96,12 +105,17 @@ const submit = async () => {
 };
 
 const resetForm = () => {
-  id.value = '';
   phone.value = '';
-  clientType.value = items.value[0];
+  comment.value = '';
   fullName.value = '';
   loading.value = false;
 };
+
+const getFormData = (object: any) =>
+  Object.keys(object).reduce((formData, key) => {
+    formData.append(key, object[key]);
+    return formData;
+  }, new FormData());
 </script>
 
 <style>
