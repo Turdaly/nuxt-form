@@ -24,7 +24,7 @@
             :base-color="styles.primary"
             :color="styles.primary"
           />
-          <v-textarea v-model="comment" clearable label="Комментарий" variant="outlined" bg-color="white" :base-color="styles.primary" :color="styles.primary" />
+          <v-textarea v-model="comment" clearable label="Краткое описание о проблеме транспорта" variant="outlined" bg-color="white" :base-color="styles.primary" :color="styles.primary" />
           <v-btn type="submit" text="Отправить" :elevation="0" :color="styles.primary" size="x-large" />
         </div>
       </v-fade-transition>
